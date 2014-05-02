@@ -1,87 +1,91 @@
-import de.voidplus.leapmotion.*;
-
-LeapMotion leap;
-Grid grid;
-Globe globe;
-PulsingSphere pulsingSphere;
-RotatingAtom rotatingAtom1;
-RotatingAtom rotatingAtom2;
-RotatingAtom rotatingAtom3;
-PVector globeCenter;
-
-boolean useMouse = false;
+JSONArray windJson;
+int ny = 181;
+int nx = 360;
+float[][] windUComps = new float[ny][nx];
+float[][] windVComps = new float[ny][nx];
+// maximum intensity in this data sample is 71.67596
+// Therefore, mapping the scale to 90 should suffice
 
 void setup()
 {
-  size(960, 560, P3D);
-  frameRate(30);
-  smooth();
-  leap = new LeapMotion(this);
-  /*** Create Globe ***/
-  globe = new Globe();
-  globeCenter = new PVector(width/2, height/2, 300);
-  /*** Other things to be created ***/
-  grid = new Grid();
-  pulsingSphere = new PulsingSphere(globeCenter);
-  rotatingAtom1 = new RotatingAtom(globeCenter, new PVector(40, 70, 130), 30, 5);
-  rotatingAtom2 = new RotatingAtom(globeCenter, new PVector(70, 130, 40), 35, 6);
-  rotatingAtom3 = new RotatingAtom(globeCenter, new PVector(130, 40, 70), 25, 8);
+    background(0);
+    size(960, 560, P3D);
+    frameRate(30);
+    smooth();
+    // Load Json
+    windJson = loadJSONArray("20140501-wind-isobaric-500hPa-gfs-1.0.json");
+    JSONObject windU = windJson.getJSONObject(0);
+    
+    parseWindJson();
 }
 
 void draw()
 {
-  background(0);
-  pushMatrix();
-  /*** Update background grid ***/
-  grid.update();
-  popMatrix();
-  pushMatrix();
-  /*** Update Globe ***/
-  globe.update();
-  popMatrix();
-  pushMatrix();
-  /*** Update other  ***/
-  pulsingSphere.update();
-  popMatrix();
-  pushMatrix();
-  rotatingAtom1.update();
-  popMatrix();
-  pushMatrix();
-  rotatingAtom2.update();
-  popMatrix();
-  pushMatrix();
-  rotatingAtom3.update();
-  popMatrix();
-  pushMatrix();
-  /*** Leap Motion Control ***/
-
-  if ( !leap.isConnected() )
-  { 
-    useMouse = true;
-  }
-  else {
-    useMouse = false;
-  }
-  if ( !useMouse )
-  {
-    if ( leap.countHands() > 0 )
-    {
-      Hand firstHand = leap.getHands().get(0);
-      firstHand.draw();
-      globe.rotateHorizontally(firstHand.getPosition().x * 360 / width);
-      globe.rotateVertically(firstHand.getPosition().y * 360 / height);
-    }
-  }
-
-  popMatrix();
+    
 }
 
-void mouseMoved()
+void parseWindJson()
 {
-  if (useMouse)
-  {
-    globe.rotateHorizontally(mouseX * 360 / width);
-    globe.rotateVertically(mouseY * 360 / height);
-  }
+    // parse u into a 2d array
+    windUComps = parseWindVectorComp(windJson.getJSONObject(0).getJSONArray("data"));
+    // parse v into a 2d array
+    windVComps = parseWindVectorComp(windJson.getJSONObject(1).getJSONArray("data"));
+    
+    // show em on a 360 * 180 square
+    colorMode(HSB, 180);
+    for (int i = 0; i < 360; i++) {
+        for (int j = 0; j < 180; j++) {
+            float intensity = calcIntensity(windUComps[j][i], windVComps[j][i]);
+            int huedI = int(180 - (intensity*180/90 + 60)); // intensity map to 0 ~ 90
+            int satuation = 180;
+            if (huedI <= 0)
+            {
+                huedI = 180 + huedI;
+                if (huedI < 150)
+                {
+                    satuation = 180 - (150 - huedI)*5;
+                    huedI = 150;
+                }
+            }
+            stroke(huedI, satuation, 180);
+            point(i + 390, j + 300);
+        }
+    }
+    colorMode(RGB, 255);
 }
 
+float[][] parseWindVectorComp(JSONArray comps)
+{
+    float[][] result = new float[ny][nx]; // result[j][i] // result[lat][lon]
+    int counter = 0;
+    for (int j = 0; j < ny; j++)
+    {
+        for (int i = 0; i < nx; i++)
+        {
+            result[j][i] = comps.getFloat(counter);
+            counter++;
+        }
+    }
+    
+    return result;
+}
+
+float calcIntensity(float u, float v)
+{
+    return sqrt(u*u+v*v);
+}
+
+void findMaxIntensity()
+{
+     // Find the maximum intensity for scaling to colours
+    float max = 0;
+    for (int j = 0; j < ny; j++)
+    {
+        for (int i = 0; i < nx; i++)
+        {
+            float intensity = calcIntensity(windUComps[j][i], windVComps[j][i]);
+            max = intensity > max ? intensity : max;
+        }
+    }
+    println(max);   
+}
