@@ -4,7 +4,7 @@ int nx = 360;
 float[][] windUComps = new float[ny][nx];
 float[][] windVComps = new float[ny][nx];
 // maximum intensity in this data sample is 71.67596
-// Therefore, mapping the scale to 90 should suffice
+// Therefore, mapping the scale to 75 should suffice
 
 void setup()
 {
@@ -12,6 +12,7 @@ void setup()
     size(960, 560, P3D);
     frameRate(30);
     smooth();
+    strokeCap(PROJECT);
     // Load Json
     windJson = loadJSONArray("20140501-wind-isobaric-500hPa-gfs-1.0.json");
     JSONObject windU = windJson.getJSONObject(0);
@@ -36,7 +37,7 @@ void parseWindJson()
     for (int i = 0; i < 360; i++) {
         for (int j = 0; j < 180; j++) {
             float intensity = calcIntensity(windUComps[j][i], windVComps[j][i]);
-            int huedI = int(180 - (intensity*180/90 + 60)); // intensity map to 0 ~ 90
+            int huedI = int(180 - (intensity*180/ 75 + 60)); // intensity map to 0 ~ 75
             int satuation = 180;
             if (huedI <= 0)
             {
@@ -47,8 +48,9 @@ void parseWindJson()
                     huedI = 150;
                 }
             }
+            strokeWeight(2);
             stroke(huedI, satuation, 180);
-            point(i + 390, j + 300);
+            point(i*2, j*2);
         }
     }
     colorMode(RGB, 255);
