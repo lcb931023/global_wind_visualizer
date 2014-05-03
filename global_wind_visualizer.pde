@@ -1,8 +1,13 @@
 JSONArray windJson;
 int ny = 181;
 int nx = 360;
+float MAP_W = 720;
+float MAP_H = 360;
+int MAP_MULTI = 2;
 float[][] windUComps = new float[ny][nx];
 float[][] windVComps = new float[ny][nx];
+WindParticle[] flows = new WindParticle[10000];
+int PARTICLE_LIFESPAN = 7000;//ms
 // maximum intensity in this data sample is 71.67596
 // Therefore, mapping the scale to 75 should suffice
 
@@ -18,11 +23,25 @@ void setup()
     JSONObject windU = windJson.getJSONObject(0);
     
     parseWindJson();
+    drawColorMap(180);
+    stroke(255);
+    for(int i = 0; i < flows.length; i++)
+    {
+        flows[i] = new WindParticle();
+    }
 }
 
 void draw()
 {
-    
+    drawColorMap(10);
+    fill(0, 10);
+    //rect(0, 0, MAP_W, MAP_H);
+    strokeWeight(1);
+    stroke(255);
+    for(int i = 0; i < flows.length; i++)
+    {
+        flows[i].update(i);
+    }
 }
 
 void parseWindJson()
@@ -31,8 +50,10 @@ void parseWindJson()
     windUComps = parseWindVectorComp(windJson.getJSONObject(0).getJSONArray("data"));
     // parse v into a 2d array
     windVComps = parseWindVectorComp(windJson.getJSONObject(1).getJSONArray("data"));
-    
-    // show em on a 360 * 180 square
+}
+
+void drawColorMap(int alpha)
+{
     colorMode(HSB, 180);
     for (int i = 0; i < 360; i++) {
         for (int j = 0; j < 180; j++) {
@@ -48,9 +69,11 @@ void parseWindJson()
                     huedI = 150;
                 }
             }
-            strokeWeight(2);
-            stroke(huedI, satuation, 180);
-            point(i*2, j*2);
+            //strokeWeight(MAP_MULTI);
+            noStroke();
+            fill(huedI, satuation, 100, alpha);
+            //point(i*MAP_MULTI, j*MAP_MULTI);
+            rect(i*MAP_MULTI, j*MAP_MULTI, MAP_MULTI, MAP_MULTI);
         }
     }
     colorMode(RGB, 255);
