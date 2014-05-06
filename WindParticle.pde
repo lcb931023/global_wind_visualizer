@@ -13,7 +13,7 @@ class WindParticle
     public WindParticle()
     {
         pos = new PVector( random(MAP_W), random(MAP_H) );
-        point( pos.x, pos.y );
+        globeTex.point( pos.x, pos.y );
         savedTimer = millis();
     }
 
@@ -22,14 +22,14 @@ class WindParticle
         checkLife(respawnQueueIndex);
         pos.add(mapPosToWind());
         wrapBound();
-        point( pos.x, pos.y );
+        globeTex.point( pos.x, pos.y );
     }
     
     private void checkLife(int respawnQueueIndex)
     {
         // use the particle's own index to separate when they get respawned,
         // so they respawn at separate times
-        if ( millis() - savedTimer > PARTICLE_LIFESPAN - int(respawnQueueIndex / 5) )
+        if ( millis() - savedTimer > PARTICLE_LIFESPAN - int(random(0, 3000)) /* PARTICLE_LIFESPAN - int(respawnQueueIndex / 5) */ )
         {
             pos.set(random(MAP_W), random(MAP_H));
             savedTimer = millis();
