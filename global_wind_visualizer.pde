@@ -19,10 +19,9 @@ float rotationSpeed = 0.02; // the rotation speed
 
 // maximum intensity in this data sample is 71.67596
 // Therefore, mapping the scale to 75 should suffice
-
 void setup()
 {
-    size(960, 560, P3D);
+    size(displayWidth, displayHeight, P3D);
     frameRate(30);
     //smooth();
     perspective(PI/3.0, (float) width/height, 0.1, 1000000);
@@ -145,4 +144,3 @@ void findMaxIntensity()
     }
     println(max);
 }
-
