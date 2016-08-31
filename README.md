@@ -1,12 +1,8 @@
 global_wind_visualizer
 ===========================
 
-Leap Motion enabled Sci-fi styled 3D Global Wind Flow Visualizer 
+Leap Motion enabled 3D Global Wind Flow Visualizer 
 
-Wind data is from Cameron Beccario's [earth], made with [grib2json].
+A port of @cambecc's [earth] to Processing. The original project visualizes wind flow in great details but every time user rotates the globe it needs a re-render, stuttering navigation. Thought it'll be interesting to build a version that allows looking around the globe without re-rendering, by creating the globe in 3D and use wind map as texture.
 
-Based off my [Nuclear Bundling Visualizer] and @cambecc's [earth]. Inspired by @cambecc, Tron Legacy and Iron Man.
-
-[grib2json]:https://github.com/cambecc/grib2json
-[Nuclear Bundling Visualizer]:https://github.com/lcb931023/nuclear_bundling_visualizer
 [earth]:https://github.com/cambecc/earth
